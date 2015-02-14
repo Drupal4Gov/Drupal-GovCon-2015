@@ -1,0 +1,46 @@
+diff --git a/barcode.info b/barcode.info
+index d484e6e..a16de75 100755
+--- a/barcode.info
++++ b/barcode.info
+@@ -3,6 +3,9 @@ description = Implements a barcode form element. Generate a barcode image on the
+ core = 7.x
+ package = Fields
+ 
++dependencies[] = entity
++dependencies[] = entity_token
++
+ files[] = barcode.module
+ files[] = barcode.install
+ files[] = includes/barcode.plugins.inc
+diff --git a/barcode.module b/barcode.module
+index 04f2558..20a6b07 100755
+--- a/barcode.module
++++ b/barcode.module
+@@ -352,7 +352,7 @@ function barcode_field_formatter_view($object_type, $object, $field, $instance,
+ function barcode_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+   foreach ($items as $entity_id => $entity_items) {
+     foreach ($entity_items as $delta => $value) {
+-      _barcode_sanitize($items[$entity_id][$delta], $delta, $field, $instances[$entity_id], $entities[$entity_id]);
++      _barcode_sanitize($items[$entity_id][$delta], $delta, $field, $instances[$entity_id], $entities[$entity_id], $entity_type);
+     }
+   }
+ }
+@@ -414,13 +414,14 @@ function barcode_field_widget_form(&$form, &$form_state, $field, $instance, $lan
+  * change token to appropriate values.
+  *
+  */
+-function _barcode_sanitize(&$item, $delta, &$field, $instance, &$node) {
++function _barcode_sanitize(&$item, $delta, &$field, $instance, $entity, $entity_type) {
+   if (empty($item['value'])) {
+     return;
+   }
+-
+-  $token_node = isset($node->nid) ? node_load($node->nid) : $node;
+-  $item['value'] = token_replace($item['value'], array('node' => $token_node), array('clear' => 1));
++  if (is_numeric($entity)) {
++    $entity = entity_load_single($entity_type, $entity);
++  }
++  $item['value'] = token_replace($item['value'], array($entity_type => $entity), array('clear' => 1));
+ }
+ 
+ /**************************************************************************
