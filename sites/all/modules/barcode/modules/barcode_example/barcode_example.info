@@ -1,0 +1,5 @@
+name = Barcode example
+description = Barcode FAPI element example.
+core = 7.x
+dependencies[] = barcode
+files[] = barcode_example.module
